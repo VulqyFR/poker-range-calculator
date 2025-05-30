@@ -28,15 +28,15 @@ const allRanks = [
     '2',
 ];
 
-// Ranges corrigés selon la théorie GTO moderne
+// GTO-based opening ranges for cash games
 const ranges: Record<string, Record<number, string[]>> = {
     UTG: {
-        4: ['88+', 'AJs+', 'KQs', 'AKo'], // 5.5% - Très tight
+        4: ['88+', 'AJs+', 'KQs', 'AKo'], // 5.5% - Very tight
         5: ['77+', 'ATs+', 'KQs', 'AQo+'], // 7.7% - Tight
         6: ['66+', 'A9s+', 'KQs', 'AQo+', 'KQo'], // 9.2% - Standard
-        7: ['66+', 'A9s+', 'KJs+', 'QJs', 'AQo+'], // 8.9% - Retour tight
-        8: ['77+', 'ATs+', 'KQs', 'AQo+'], // 7.7% - Plus tight
-        9: ['77+', 'AJs+', 'KQs', 'AQo+'], // 6.8% - Très tight
+        7: ['66+', 'A9s+', 'KJs+', 'QJs', 'AQo+'], // 8.9% - Back to tight
+        8: ['77+', 'ATs+', 'KQs', 'AQo+'], // 7.7% - Tighter
+        9: ['77+', 'AJs+', 'KQs', 'AQo+'], // 6.8% - Very tight
     },
     'UTG+1': {
         7: ['55+', 'A9s+', 'KJs+', 'QJs', 'JTs', 'AJo+', 'KQo'], // 11.3%
@@ -393,7 +393,7 @@ const ranges: Record<string, Record<number, string[]>> = {
             'J8o+',
             'T9o',
         ], // 58.3% - vs SB
-        3: [], // BB ne raise jamais vs raise, seulement call/fold
+        3: [], // BB never raises vs raise, only call/fold
         4: [],
         5: [],
         6: [],
@@ -507,14 +507,15 @@ export default function Grid() {
 
     return (
         <div className={`${isCompact ? 'p-2' : 'p-6'} max-w-6xl mx-auto`}>
-            <div className="flex flex-col lg:flex-row gap-6">
-                {/* Control Panel */}
-                <div className="lg:w-80 bg-gray-800 border border-gray-600 rounded-lg p-4">
-                    <h2 className="text-xl font-bold text-white mb-4">
-                        Poker Range Calculator
-                    </h2>
+            <h1 className="text-4xl font-extrabold mb-6 text-center text-white">
+                Cash Game Preflop Ranges
+            </h1>
 
-                    {/* Players Selection */}
+            <div className="flex flex-col lg:flex-row gap-6">
+                <div className="lg:w-80 border border-[#424242] rounded-lg shadow-lg p-4">
+                    <h2 className="text-xl font-bold text-white mb-4">
+                        Quick Setup
+                    </h2>
                     <div className="mb-4">
                         <label className="text-white text-sm mb-2 block font-medium">
                             Players
@@ -525,7 +526,7 @@ export default function Grid() {
                                     key={p}
                                     className={`p-2 rounded text-sm font-medium transition ${
                                         players === p
-                                            ? 'bg-blue-500 text-white shadow-lg'
+                                            ? 'text-indigo-600'
                                             : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                                     }`}
                                     onClick={() => setPlayers(p)}
@@ -535,8 +536,6 @@ export default function Grid() {
                             ))}
                         </div>
                     </div>
-
-                    {/* Position Selection */}
                     <div className="mb-4">
                         <label className="text-white text-sm mb-2 block font-medium">
                             Position
@@ -547,7 +546,7 @@ export default function Grid() {
                                     key={pos}
                                     className={`p-2 rounded text-xs font-medium transition ${
                                         position === pos
-                                            ? 'bg-green-500 text-white shadow-lg'
+                                            ? 'bg-green-500 text-white'
                                             : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                                     }`}
                                     onClick={() => setPosition(pos)}
@@ -557,126 +556,114 @@ export default function Grid() {
                             ))}
                         </div>
                     </div>
-
-                    {/* Range Info */}
-                    <div className="bg-gray-700 border border-gray-600 rounded p-4 mb-4">
-                        <div className="text-white text-sm mb-2 font-medium">
-                            <span className="text-green-400">{position}</span>{' '}
+                    <div className="border border-[#424242] rounded p-3 mb-4">
+                        <div className="text-white text-sm mb-2">
+                            <strong className="text-green-400">
+                                {position}
+                            </strong>{' '}
                             vs {players} players
                         </div>
                         {showPercentage && (
-                            <div className="text-green-400 text-xl font-bold mb-1">
+                            <div className="text-green-400 text-lg font-bold">
                                 {percentage}%
                             </div>
                         )}
                         <div className="text-gray-300 text-xs">
                             {playedHands} / {totalHands} combinations
                         </div>
-                        <div className="text-gray-400 text-xs mt-1">
+                        <div className="text-gray-400 text-xs mt-1 break-words">
                             {hands.join(', ') || 'No range defined'}
                         </div>
                     </div>
-
-                    {/* Controls */}
                     <div className="space-y-2">
                         <button
-                            className="w-full p-2 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm font-medium transition"
+                            className="w-full p-2 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm transition"
                             onClick={() => setIsCompact(!isCompact)}
                         >
                             {isCompact ? '📋 Expand' : '📱 Compact'} View
                         </button>
                         <button
-                            className="w-full p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-sm font-medium transition"
+                            className="w-full p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-sm transition"
                             onClick={() => setShowPercentage(!showPercentage)}
                         >
                             {showPercentage ? '🔢 Hide' : '📊 Show'} Percentage
                         </button>
                     </div>
                 </div>
-
-                {/* Range Chart */}
                 <div className="flex-1">
-                    <div className="bg-gray-900 border border-gray-600 rounded-lg p-4">
-                        <div className="overflow-auto">
-                            <table
-                                className={`table-auto border-separate mx-auto ${
-                                    isCompact
-                                        ? 'border-spacing-0'
-                                        : 'border-spacing-1'
-                                }`}
-                            >
-                                <thead>
-                                    <tr>
+                    <div className="border border-[#424242] rounded-lg shadow-lg p-4">
+                        <table
+                            className={`table-auto border-separate mx-auto ${
+                                isCompact
+                                    ? 'border-spacing-0'
+                                    : 'border-spacing-1'
+                            }`}
+                        >
+                            <thead>
+                                <tr>
+                                    <th
+                                        className={`border p-1 border-[#424242] ${
+                                            isCompact ? 'w-6 h-6' : 'w-8 h-8'
+                                        }`}
+                                    ></th>
+                                    {allRanks.map((r) => (
                                         <th
-                                            className={`border border-gray-500 bg-gray-700 ${
+                                            key={r}
+                                            className={`border border-[#424242] text-center text-whitfont-bold ${
                                                 isCompact
-                                                    ? 'w-6 h-6'
-                                                    : 'w-10 h-10'
+                                                    ? 'w-6 h-6 text-xs p-0'
+                                                    : 'w-10 h-10 text-sm p-1'
                                             }`}
-                                        ></th>
-                                        {allRanks.map((r) => (
-                                            <th
-                                                key={r}
-                                                className={`border border-gray-500 text-center text-white bg-gray-700 font-bold ${
+                                        >
+                                            {r}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {matrix.map((row, i) => (
+                                    <tr key={i}>
+                                        <th
+                                            className={`border border-[#424242] text-white text-center font-bold ${
+                                                isCompact
+                                                    ? 'w-6 h-6 text-xs p-0'
+                                                    : 'w-10 h-10 text-sm p-1'
+                                            }`}
+                                        >
+                                            {allRanks[i]}
+                                        </th>
+                                        {row.map((cell, j) => (
+                                            <td
+                                                key={j}
+                                                title={`${cell.label} - ${
+                                                    cell.play ? 'RAISE' : 'FOLD'
+                                                }`}
+                                                className={`border text-center align-middle font-bold transition hover:brightness-110 cursor-pointer ${
                                                     isCompact
                                                         ? 'w-6 h-6 text-xs p-0'
-                                                        : 'w-10 h-10 text-sm p-1'
+                                                        : 'w-10 h-10 text-xs p-1'
+                                                } ${
+                                                    cell.play
+                                                        ? 'bg-green-500 text-white border-green-400'
+                                                        : 'bg-red-500 text-white border-red-400'
                                                 }`}
                                             >
-                                                {r}
-                                            </th>
+                                                {isCompact ? '' : cell.label}
+                                            </td>
                                         ))}
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {matrix.map((row, i) => (
-                                        <tr key={i}>
-                                            <th
-                                                className={`border border-gray-500 bg-gray-700 text-white text-center font-bold ${
-                                                    isCompact
-                                                        ? 'w-6 h-6 text-xs p-0'
-                                                        : 'w-10 h-10 text-sm p-1'
-                                                }`}
-                                            >
-                                                {allRanks[i]}
-                                            </th>
-                                            {row.map((cell, j) => (
-                                                <td
-                                                    key={j}
-                                                    title={`${cell.label} - ${
-                                                        cell.play
-                                                            ? 'RAISE'
-                                                            : 'FOLD'
-                                                    }`}
-                                                    className={`border border-gray-500 text-center align-middle font-bold transition-all hover:scale-105 cursor-pointer ${
-                                                        isCompact
-                                                            ? 'w-6 h-6 text-xs p-0'
-                                                            : 'w-10 h-10 text-xs p-1'
-                                                    } ${
-                                                        cell.play
-                                                            ? 'bg-green-500 text-white border-green-300 shadow-md'
-                                                            : 'bg-red-500 text-white border-red-300'
-                                                    }`}
-                                                >
-                                                    {isCompact
-                                                        ? ''
-                                                        : cell.label}
-                                                </td>
-                                            ))}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                ))}
+                            </tbody>
+                        </table>
 
-                        <div className="mt-4 flex justify-center gap-8 text-sm text-white">
+                        <div className="mt-4 flex justify-center gap-6 text-sm text-white">
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 bg-green-500 rounded border border-green-300 shadow-sm" />
-                                <span className="font-medium">RAISE</span>
+                                <div className="w-4 h-4 bg-green-500 rounded border border-green-400" />
+                                <span>RAISE</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 bg-red-500 rounded border border-red-300" />
-                                <span className="font-medium">FOLD</span>
+                                <div className="w-4 h-4 bg-red-500 rounded border border-red-400" />
+                                <span>FOLD</span>
                             </div>
                         </div>
                     </div>
