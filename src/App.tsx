@@ -283,7 +283,7 @@ const ranges: Record<string, Record<number, string[]>> = {
             'K6o+',
             'Q8o+',
             'J9o+',
-        ], // 48.5%
+        ], // 48.5% - 3bet vs BB
         3: ['55+', 'A5s+', 'K8s+', 'Q9s+', 'J9s+', 'T9s', 'ATo+', 'KJo+'], // 15.4% - vs BTN
         4: [
             '44+',
@@ -392,14 +392,34 @@ const ranges: Record<string, Record<number, string[]>> = {
             'Q7o+',
             'J8o+',
             'T9o',
-        ], // 58.3% - vs SB
-        3: [], // BB never raises vs raise, only call/fold
-        4: [],
-        5: [],
-        6: [],
-        7: [],
-        8: [],
-        9: [],
+        ], // 58.3% - 3bet vs SB
+        3: [
+            '22+',
+            'A2s+',
+            'K4s+',
+            'Q8s+',
+            'J9s+',
+            'T9s',
+            'A5o+',
+            'K9o+',
+            'QJo',
+        ], // 35.4% - Call vs BTN
+        4: [
+            '22+',
+            'A2s+',
+            'K6s+',
+            'Q9s+',
+            'J9s+',
+            'T9s',
+            'A7o+',
+            'KTo+',
+            'QJo',
+        ], // 30.8% - Call vs BTN
+        5: ['22+', 'A2s+', 'K7s+', 'QTs+', 'JTs', 'A8o+', 'KJo+'], // 25.4% - Call vs BTN/CO
+        6: ['22+', 'A3s+', 'K8s+', 'QTs+', 'JTs', 'A9o+', 'KJo+'], // 22.5% - Call vs multiple
+        7: ['33+', 'A5s+', 'K9s+', 'QJs', 'ATo+', 'KQo'], // 18.3% - Call vs multiple
+        8: ['44+', 'A7s+', 'KTs+', 'QJs', 'AJo+', 'KQo'], // 15.4% - Call vs multiple
+        9: ['55+', 'A8s+', 'KJs+', 'QJs', 'AQo+'], // 12.4% - Call vs multiple
     },
 };
 
@@ -505,6 +525,18 @@ export default function Grid() {
     );
     const percentage = ((playedHands / totalHands) * 100).toFixed(1);
 
+    // Determine action type
+    const getActionType = () => {
+        if (position === 'BB') {
+            if (players === 2) return '3BET';
+            return 'CALL';
+        }
+        return 'RAISE';
+    };
+
+    const actionType = getActionType();
+    const isBBDefend = position === 'BB' && players > 2;
+
     return (
         <div className={`${isCompact ? 'p-2' : 'p-6'} max-w-6xl mx-auto`}>
             <h1 className="text-4xl font-extrabold mb-6 text-center text-white">
@@ -516,6 +548,7 @@ export default function Grid() {
                     <h2 className="text-xl font-bold text-white mb-4">
                         Quick Setup
                     </h2>
+
                     <div className="mb-4">
                         <label className="text-white text-sm mb-2 block font-medium">
                             Players
@@ -526,7 +559,7 @@ export default function Grid() {
                                     key={p}
                                     className={`p-2 rounded text-sm font-medium transition ${
                                         players === p
-                                            ? 'text-indigo-600'
+                                            ? 'bg-blue-500 text-white'
                                             : 'bg-gray-600 text-gray-300 hover:bg-gray-500'
                                     }`}
                                     onClick={() => setPlayers(p)}
@@ -536,6 +569,7 @@ export default function Grid() {
                             ))}
                         </div>
                     </div>
+
                     <div className="mb-4">
                         <label className="text-white text-sm mb-2 block font-medium">
                             Position
@@ -556,12 +590,16 @@ export default function Grid() {
                             ))}
                         </div>
                     </div>
+
                     <div className="border border-[#424242] rounded p-3 mb-4">
                         <div className="text-white text-sm mb-2">
                             <strong className="text-green-400">
                                 {position}
                             </strong>{' '}
                             vs {players} players
+                            <span className="text-yellow-400 ml-2">
+                                ({actionType})
+                            </span>
                         </div>
                         {showPercentage && (
                             <div className="text-green-400 text-lg font-bold">
@@ -575,6 +613,7 @@ export default function Grid() {
                             {hands.join(', ') || 'No range defined'}
                         </div>
                     </div>
+
                     <div className="space-y-2">
                         <button
                             className="w-full p-2 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm transition"
@@ -590,6 +629,7 @@ export default function Grid() {
                         </button>
                     </div>
                 </div>
+
                 <div className="flex-1">
                     <div className="border border-[#424242] rounded-lg shadow-lg p-4">
                         <table
@@ -609,7 +649,7 @@ export default function Grid() {
                                     {allRanks.map((r) => (
                                         <th
                                             key={r}
-                                            className={`border border-[#424242] text-center text-whitfont-bold ${
+                                            className={`border border-[#424242] text-center text-white font-bold ${
                                                 isCompact
                                                     ? 'w-6 h-6 text-xs p-0'
                                                     : 'w-10 h-10 text-sm p-1'
@@ -636,7 +676,9 @@ export default function Grid() {
                                             <td
                                                 key={j}
                                                 title={`${cell.label} - ${
-                                                    cell.play ? 'RAISE' : 'FOLD'
+                                                    cell.play
+                                                        ? actionType
+                                                        : 'FOLD'
                                                 }`}
                                                 className={`border text-center align-middle font-bold transition hover:brightness-110 cursor-pointer ${
                                                     isCompact
@@ -644,7 +686,9 @@ export default function Grid() {
                                                         : 'w-10 h-10 text-xs p-1'
                                                 } ${
                                                     cell.play
-                                                        ? 'bg-green-500 text-white border-green-400'
+                                                        ? isBBDefend
+                                                            ? 'bg-blue-500 text-white border-blue-400'
+                                                            : 'bg-green-500 text-white border-green-400'
                                                         : 'bg-red-500 text-white border-red-400'
                                                 }`}
                                             >
@@ -658,8 +702,14 @@ export default function Grid() {
 
                         <div className="mt-4 flex justify-center gap-6 text-sm text-white">
                             <div className="flex items-center gap-2">
-                                <div className="w-4 h-4 bg-green-500 rounded border border-green-400" />
-                                <span>RAISE</span>
+                                <div
+                                    className={`w-4 h-4 rounded border ${
+                                        isBBDefend
+                                            ? 'bg-blue-500 border-blue-400'
+                                            : 'bg-green-500 border-green-400'
+                                    }`}
+                                />
+                                <span>{actionType}</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className="w-4 h-4 bg-red-500 rounded border border-red-400" />
